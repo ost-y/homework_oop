@@ -9,17 +9,16 @@ class Student:
 
 
     def rate_lecture(self, lecturer, course, grade):
-        if isinstance(lecturer, Lecturer) and course in lecturer.courses_attached and course in student.courses_in_progress:
-            if course in lecturer.grades:
-                lecturer.grades[course] += [grade]
-            else:
-                lecturer.grades[course] = [grade]
+        if isinstance(lecturer, Lecturer) and course in lecturer.courses_attached and course in self.courses_in_progress:
+            lecturer.grades.setdefault(course, []).append(grade)
         else:
             return 'Ошибка'
-    def average_st_grade(self):
-        for grade in self.grades.values():
-            return sum(grade)/len(grade)
 
+    def average_st_grade(self):
+        all_grades = []
+        for grades in self.grades.values():
+            all_grades.extend(grades)
+        return sum(all_grades) / len(all_grades) if all_grades else 0
     # self == other
     def __eq__(self, other):
         return self.average_st_grade() == other.average_st_grade()
@@ -33,7 +32,13 @@ class Student:
         return self.average_st_grade() < other.average_st_grade()
 
     def __str__(self):
-        return f'Имя: {self.name}\nФамилия: {self.surname}\nСредняя оценка за домашние задания: {self.average_st_grade():.1f}\nКурсы в процессе изучения: {', '.join(self.courses_in_progress)}\nЗавершенные курсы: {', '.join(self.finished_courses)}'
+        return (
+            f"Имя: {self.name}\n"
+            f"Фамилия: {self.surname}\n"
+            f"Средняя оценка за домашние задания: {self.average_st_grade():.1f}\n"
+            f"Курсы в процессе изучения: {', '.join(self.courses_in_progress)}\n"
+            f"Завершенные курсы: {', '.join(self.finished_courses)}"
+        )
 class Mentor:
     def __init__(self, name, surname):
         self.name = name
@@ -81,14 +86,12 @@ class Reviewer(Mentor):
     def __str__(self):
         return f'Имя: {self.name}\nФамилия: {self.surname}'
 
-# def average_students(students, course):          # не понимаю, почему не работает...
-#     for student in students:
-#         av_students = []
-#
-#         if course in student.grades[course]:
-#             av_students.append(student.average_st_grade())
-#             return sum(av_students)/len(av_students)
-#         print(av_students)
+def average_students(students, course):
+    all_grades = []
+    for student in students:
+        if course in student.grades:
+            all_grades.extend(student.grades[course])
+    return sum(all_grades) / len(all_grades) if all_grades else 0
 
 
 lecturer = Lecturer('Иван', 'Иванов')
@@ -131,8 +134,8 @@ print(student.__lt__(some_student))
 print(lecturer.__eq__(some_lecturer))
 print(lecturer.__gt__(some_lecturer))
 print(lecturer.__lt__(some_lecturer))
-# print(average_students(students, 'Python'))
-# print(student.grades)
-# print(student.average_st_grade())
-# print(some_student.average_st_grade())
-# print(students)
+print(average_students(students, 'Python'))
+print(student.grades)
+print(student.average_st_grade())
+print(some_student.average_st_grade())
+print(students)
